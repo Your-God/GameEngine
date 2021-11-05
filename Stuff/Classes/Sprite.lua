@@ -1,13 +1,21 @@
 local SuperClass = require("Classes/Transformation")
+local EventClass = require("DataTypes/EventManager")
 local SpriteMetaTable = {}
+local InteractionLedger = {}
+  setmetatable(InteractionLedger, {__mode = "k"}) -- Creates a weak table
+
+function SpriteMetaTable.__GetInteractionLedger()
+  return InteractionLedger
+end
 
 local BlankImage = love.image.newImageData(1,1) -- creates a tiny empty image
+BlankImage = love.graphics.newImage(BlankImage)
+
 local BlankColor = {r=1,g=1,b=1}
 
 local function SetColor(r, g, b)
   error("This method hasn't been implemented yet")
 end
-
 
 local function OnMouseEnter(self)
   error("This method hasn't been implemented yet")
@@ -25,11 +33,11 @@ end
 local function OnMouseUp(self)
   error("This method hasn't been implemented yet")
 end
-local function GetActualSize(self)
-  error("This method hasn't been implemented yet")
-end
+
 local function Render(self)
-  love.graphics.draw(self.__InternalObj.SpriteAsset)
+  local Pos = self.ActualPosition
+  love.graphics.draw(self.__InternalObj.SpriteAsset, Pos.x, Pos.y)
+  -- Currently Doesn't Scale sprites
 end
 local function SetSprite(self, NewSprite)
   if NewSprite == nil then
@@ -40,6 +48,17 @@ local function SetSprite(self, NewSprite)
   
     self.__InternalObj.SpriteAsset = NewSprite
   end
+end
+
+local function __MarkRenderLayer(self, ID)
+  -- When obj gets rendered it will call this function tagging it with the passed ID
+  -- This is so we know what gets rendered over what
+  -- Perfect for mouse detection
+  InteractionLedger[self] = ID
+end
+
+local function __GetRenderLayer(self)
+  return InteractionLedger[self]
 end
 
 function SpriteMetaTable.New(self, DefaultParent, DefaultName)
@@ -58,11 +77,13 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
     OnMouseEnter = OnMouseEnter,
     OnMouseHover = OnMouseHover,
     OnMouseLeave = OnMouseHover,
-    OnMouseDown  = OnMouseDown,
+    OnMouseDown  = EventClass:New(),
     OnMouseUp    = OnMouseUp,
-    GetActualSize= GetActualSize,
     Render       = Render, -- Used Internally, please don't use.
-    SpriteAsset  = BlankImage -- Values can not be set to nil or it will cause problems
+    SpriteAsset  = BlankImage, -- Values can not be set to nil or it will cause problems
+    __RenderLayer=-1,  -- The layer that the object gets rendered at
+    __MarkRenderLayer = __MarkRenderLayer,
+    __GetRenderLayer  = __GetRenderLayer,
   }
   local WriteExposed = {
     -- Can be freely assigned with no problem
@@ -72,7 +93,7 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
   SuperObj:__Inject(WriteProtected, WriteExposed, WriteMethods) -- Injects the SuperObj with our updated Values
   --------------------------------------------------------------------------------
   -- Anything that should be done after the Object is setup should be done here
-  
+  InteractionLedger[SuperObj] = WriteProtected.__RenderLayer -- The Render Layer; -1 means it hasn't been defined yet
   
   return SuperObj
 end

@@ -11,7 +11,7 @@ end
 local function Merge(t1, t2)
   for k, v in pairs(t2) do
       if (type(v) == "table") and (type(t1[k] or false) == "table") then
-          merge(t1[k], t2[k])
+          Merge(t1[k], t2[k])
       else
           --t1[k] = v
           rawset(t1,k,v)
@@ -72,7 +72,7 @@ local function AssignParent(self, Value)
       error("Cannot assign an object's Parent to itself")
     else
       self.__InternalObj.Parent = Value
-      Value.__InternalObj:AddChild(self)
+      Value:AddChild(self)
     end
   else
     error("Cannot assign Parent to a non object")
@@ -80,11 +80,11 @@ local function AssignParent(self, Value)
 end
 
 local function AddChild(self, Child)
-  self.__InternalObject.Children[Child] = Child
+  self.__InternalObj.Children[Child] = Child
 end
 
 local function RemoveChild(self, Child)
-  self.__InternalObject.Children[Child] = nil
+  self.__InternalObj.Children[Child] = nil
 end
 
 local function FindParentNamed(self, NameToFind)
@@ -97,6 +97,11 @@ end
 
 local function FindParentTagged(self, Tag)
   error("This method hasn't been implemented yet")
+end
+
+local function Inherited(self, Class)
+  -- Checks if self inherited a Class or not
+  return self.__InternalObj.__Inherits
 end
 
 local function GetChildren(self)

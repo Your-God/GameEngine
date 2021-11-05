@@ -2,7 +2,14 @@ local SuperClass = require("Classes/Sprite")
 local FrameMetaTable = {}
 
 local function Render(self)
-  error("This method hasn't been implemented yet")
+  --error("This method hasn't been implemented yet")
+  local Pos = self.ActualPosition
+  local Size = self.ActualSize
+  love.graphics.setColor(0,0,0)
+  love.graphics.rectangle("fill",Pos.x, Pos.y, Size.x, Size.y)
+  love.graphics.setColor(1,1,1)
+  love.graphics.rectangle("fill",Pos.x+1, Pos.y+1, Size.x-2, Size.y-2)
+  love.graphics.setColor(1,1,1)
 end
 
 local function SetStyle(self, StyleAsset)
@@ -21,6 +28,7 @@ function FrameMetaTable.New(self, DefaultParent, DefaultName)
   }
   local WriteProtected = {
     --Anything in here can be read but will throw an error if assigned
+    __Inherits = SuperClass,
     ClassName = "Frame",
     Style = nil,
     Render = Render,

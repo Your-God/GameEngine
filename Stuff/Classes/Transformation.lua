@@ -6,27 +6,59 @@ local Vector2 = require("DataTypes/Vector2")
 
 
 local function SetRotation(self, Rotation)
-  error("This method hasn't been implemented yet")
+  assert(type(Rotation) == "number", "Invalid DataType, requires type 'number'")
+  self.__InternalObj.Rotation = Rotation
 end
 
 local function SetSize(self, SizeUDim2)
-  error("This method hasn't been implemented yet")
+
+  assert(type(SizeUDim2) == "table" and SizeUDim2.__Type == "UDim2", "Invalid DataType, requires type 'UDim2'")
+  self.__InternalObj.Size = SizeUDim2
+  if self.Parent and self.Parent.UpdateSize then
+    self.Parent:UpdateSize()
+    self.Parent:UpdatePosition() -- We have to update Position because it's dependent on size
+  end
 end
 
 local function SetPosition(self, PositionUDim2)
   assert(type(PositionUDim2) == "table" and PositionUDim2.__Type == "UDim2", "Invalid DataType, requires type 'UDim2'")
   self.__InternalObj.Position = PositionUDim2
+  if (self.Parent) then
+    self.Parent:UpdatePosition()
+  else
+    print("Err; no parent; default ActualPosition")
+    self.__InternalObj.ActualPosition = Vector2:New() -- IDK
+  end
 end
 
-local function TransformationPush(self)
-  love.graphics.push()
-  local _UDim = self.InternalObj.Position
-  love.graphics.translate(UDim.x.Offset, UDim.y.Offset)
+local function UpdatePosition(self)
+  local AP = self.__InternalObj.ActualPosition
+  local AS = self.__InternalObj.ActualSize
+  for _, Child in pairs(self:GetChildren()) do
+    if (Child.UpdatePosition) then
+      Child.__InternalObj.ActualPosition = AP + Vector2:New(
+        AS.x * Child.Position.x.Scale + Child.Position.x.Offset, -- x
+        AS.y * Child.Position.y.Scale + Child.Position.y.Offset  -- y
+      )
+      Child:UpdatePosition()
+    end
+  end
 end
 
-local function TransformationPop(self)
-  love.graphics.pop()
+local function UpdateSize(self)
+  local AS = self.__InternalObj.ActualSize
+  for _, Child in pairs(self:GetChildren()) do
+    if (Child.UpdateSize) then
+      Child.__InternalObj.ActualSize = Vector2:New(
+        AS.x * Child.Size.x.Scale + Child.Size.x.Offset, -- x
+        AS.y * Child.Size.y.Scale + Child.Size.y.Offset  -- y
+      )
+      Child:UpdateSize()
+    end
+  end
 end
+
+
 
 local function SetPositionMethod(self, a,b,c,d)
   if (type(a)== "table" and a.__Type == "UDim2") then
@@ -37,16 +69,19 @@ local function SetPositionMethod(self, a,b,c,d)
   else
     error("Invalid DataType, requires type 'UDim2'")
   end
+  
+  if (self.Parent) then
+    self:UpdatePosition()
+    -- Refreshes the position of all children so to be accurate
+  end
 end
 
 local function GetActualPosition(self)
-  --error("This method hasn't been implemented yet")
-  return Vector2:New(0,0)
+  return self.__InternalObj.ActualPosition
 end
 
-local function GetActualSize(self)
-  error("This method hasn't been implemented yet")
-  return Vector2:New(0,0)
+local function GetActualSize(self) 
+  return self.__InternalObj.ActualSize
 end
 
 local function GetDistanceTo(self, Vector2)
@@ -74,10 +109,12 @@ function TransformationMetaTable.New(self, DefaultParent, DefaultName)
     ClassName = "Transformation",
     SetPosition  = SetPositionMethod,
     Position = UDim2Type:New(), -- UDim2
-    Size = UDim2Type:New(),     -- UDim2
+    Size = UDim2Type:New(0,2,0,3),     -- UDim2
     Rotation = 0,   -- Num 0 - 2PI rads
-    GetActualPosition = GetActualPosition,
-    GetActualSize = GetActualSize,
+    ActualPosition = Vector2:New(), --Vector2
+    ActualSize = Vector2:New(),     --Vector2
+    UpdatePosition = UpdatePosition,
+    UpdateSize = UpdateSize,
     GetDistanceTo = GetDistanceTo,
     GetDistanceToObj = GetDistanceToObj,
   }

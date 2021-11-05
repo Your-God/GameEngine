@@ -30,21 +30,21 @@ function Vector2_metatable.__add(x, y)
   if not (getmetatable(x) == Vector2_metatable and getmetatable(y) == Vector2_metatable) then
     error("failed to add: '" .. tostring(x) .. "' and '" .. tostring(y) .. "' ... incompatible types")
   end
-  return Vector2_metatable:new(x.x + y.x, x.y + y.y)
+  return Vector2_metatable:New(x.x + y.x, x.y + y.y)
 end
 
 function Vector2_metatable.__sub(x, y)
   if not (getmetatable(x) == Vector2_metatable and getmetatable(y) == Vector2_metatable) then
     error("failed to subtract: '" .. tostring(x) .. "' and '" .. tostring(y) .. "' ... incompatible types")
   end
-  return Vector2_metatable:new(x.x - y.x, x.y - y.y)
+  return Vector2_metatable:New(x.x - y.x, x.y - y.y)
 end
 
 function Vector2_metatable.__mul(x, y)
   if (getmetatable(x) == Vector2_metatable and getmetatable(y) == Vector2_metatable) then
     error("currently does not support CrossProduct")
   elseif (getmetatable(x) == Vector2_metatable and type(y) == "number") then
-    return Vector2_metatable:new(x.x * y, x.y * y)
+    return Vector2_metatable:New(x.x * y, x.y * y)
   else
     error("failed to multiply: '" .. tostring(x) .. "' and '" .. tostring(y) .. "' ... incompatible types")
   end
@@ -52,7 +52,7 @@ end
 
 function Vector2_metatable.__div(x, y)
   if (getmetatable(x) == Vector2_metatable and type(y) == "number") then
-    return Vector2_metatable:new(x.x / y, x.y / y)
+    return Vector2_metatable:New(x.x / y, x.y / y)
   else
     error("failed to divide: '" .. tostring(x) .. "' and '" .. tostring(y) .. "' ... incompatible types")
   end
