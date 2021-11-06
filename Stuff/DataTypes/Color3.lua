@@ -14,10 +14,13 @@ end
 
 
 function Color3_metatable.New(self, r, g, b)
+  r = r or 1
+  g = g or r
+  b = b or g
   local obj = { 
-    r = r or 1,
-    g = g or r,
-    b = b or g
+    r = r,
+    g = g,
+    b = b,
     -- I did it like this so :New(0.5) will set all values to 0.5
     -- Or :New(1,0.3) will set r = 1, g&b = 0.3
   }

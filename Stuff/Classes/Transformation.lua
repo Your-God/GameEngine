@@ -31,6 +31,14 @@ local function SetPosition(self, PositionUDim2)
   end
 end
 
+local function Offset(self, x, y)
+  if (type(PositionUDim2) == "table" and PositionUDim2.__Type == "Vector2") then
+    self.__InternalObj.ActualPosition = self.__InternalObj.ActualPosition + x -- in this case x is a Vector2
+  else
+    self.__InternalObj.ActualPosition = self.__InternalObj.ActualPosition + Vector2:New(x, y)
+  end
+end
+
 local function UpdatePosition(self)
   local AP = self.__InternalObj.ActualPosition
   local AS = self.__InternalObj.ActualSize
@@ -106,6 +114,7 @@ function TransformationMetaTable.New(self, DefaultParent, DefaultName)
   }
   local WriteProtected = {
     --Anything in here can be read but will throw an error if assigned
+    Offset = Offset,
     ClassName = "Transformation",
     SetPosition  = SetPositionMethod,
     Position = UDim2Type:New(), -- UDim2

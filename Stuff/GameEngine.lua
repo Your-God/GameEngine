@@ -33,6 +33,7 @@ GameEngine.Required["Sprite"] = require("Classes/Sprite")
 GameEngine.Required["EventManager"] = require("DataTypes/EventManager")
 GameEngine.Required["UDim2"] = require("DataTypes/UDim2")
 GameEngine.Required["Vector2"] = require("DataTypes/Vector2")
+GameEngine.Required["Color3"] = require("DataTypes/Color3")
 
 
 return GameEngine

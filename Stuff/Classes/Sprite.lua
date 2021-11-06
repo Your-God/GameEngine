@@ -23,22 +23,7 @@ local function SetColor3(self, NewColor3)
   self.__InternalObj.Color = NewColor3
 end
 
-local function OnMouseEnter(self)
-  error("This method hasn't been implemented yet")
-  -- return an event callback?
-end
-local function OnMouseHover(self)
-  error("This method hasn't been implemented yet")
-end
-local function OnMouseLeave(self)
-  error("This method hasn't been implemented yet")
-end
-local function OnMouseDown(self)
-  error("This method hasn't been implemented yet")
-end
-local function OnMouseUp(self)
-  error("This method hasn't been implemented yet")
-end
+
 
 local function Render(self)
   local Pos = self.ActualPosition
@@ -81,11 +66,11 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
     ClassName = "Sprite",
     SetColorFromRGB = SetColorRGB,
     Color = Color3Type:New(),
-    OnMouseEnter = OnMouseEnter,
-    OnMouseHover = OnMouseHover,
-    OnMouseLeave = OnMouseHover,
+    OnMouseEnter = EventClass:New(),
+    OnMouseHover = EventClass:New(),
+    OnMouseLeave = EventClass:New(),
     OnMouseDown  = EventClass:New(),
-    OnMouseUp    = OnMouseUp,
+    OnMouseUp    = EventClass:New(),
     Render       = Render, -- Used Internally, please don't use.
     SpriteAsset  = BlankImage, -- Values can not be set to nil or it will cause problems
     __RenderLayer=-1,  -- The layer that the object gets rendered at
