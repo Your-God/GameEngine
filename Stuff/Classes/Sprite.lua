@@ -1,5 +1,7 @@
 local SuperClass = require("Classes/Transformation")
 local EventClass = require("DataTypes/EventManager")
+local Color3Type = require("DataTypes/Color3")
+
 local SpriteMetaTable = {}
 local InteractionLedger = {}
   setmetatable(InteractionLedger, {__mode = "k"}) -- Creates a weak table
@@ -11,10 +13,14 @@ end
 local BlankImage = love.image.newImageData(1,1) -- creates a tiny empty image
 BlankImage = love.graphics.newImage(BlankImage)
 
-local BlankColor = {r=1,g=1,b=1}
 
-local function SetColor(r, g, b)
-  error("This method hasn't been implemented yet")
+local function SetColorRGB(self, r, g, b)
+  assert(type(r) == "number" and type(g) == "number" and type(b) == number)
+  self.__InternalObj.Color = Color3Type:New(r,g,b)
+end
+local function SetColor3(self, NewColor3)
+  assert(type(SizeUDim2) == "table" and SizeUDim2.__Type == "Color3", "Invalid DataType, requires type 'Color3'")
+  self.__InternalObj.Color = NewColor3
 end
 
 local function OnMouseEnter(self)
@@ -67,13 +73,14 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
   
   
   local WriteMethods = {
-    Color = SetColor,
+    Color = SetColor3,
     SpriteAsset = SetSprite,
   }
   local WriteProtected = {
     --Anything in here can be read but will throw an error if assigned
     ClassName = "Sprite",
-    Color = BlankColor,
+    SetColorFromRGB = SetColorRGB,
+    Color = Color3Type:New(),
     OnMouseEnter = OnMouseEnter,
     OnMouseHover = OnMouseHover,
     OnMouseLeave = OnMouseHover,
