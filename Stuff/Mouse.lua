@@ -19,7 +19,7 @@ function love.mousepressed( x, y, button, istouch, presses )
     local HighestLayer = -math.huge
     local HighestObject = nil
     for Obj, ID in pairs(SpriteClass.__GetInteractionLedger()) do
-        if (ID > HighestLayer) and (WithinBounds(Obj, x, y)) then
+        if (Obj.ListenToMouse) and (ID > HighestLayer) and (WithinBounds(Obj, x, y)) then
             HighestLayer = ID
             HighestObject = Obj
         end

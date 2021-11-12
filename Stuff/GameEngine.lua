@@ -29,11 +29,14 @@ GameEngine.Required["Transformation"] = require("Classes/Transformation")
 GameEngine.Required["Scene"] = require("Classes/Scene")
 GameEngine.Required["Frame"] = require("Classes/Frame")
 GameEngine.Required["Sprite"] = require("Classes/Sprite")
+GameEngine.Required["Text"] = require("Classes/Text")
+GameEngine.Required["Collider"] = require("Classes/Collider")
 
 GameEngine.Required["EventManager"] = require("DataTypes/EventManager")
 GameEngine.Required["UDim2"] = require("DataTypes/UDim2")
 GameEngine.Required["Vector2"] = require("DataTypes/Vector2")
 GameEngine.Required["Color3"] = require("DataTypes/Color3")
+GameEngine.Required["World"] = require("DataTypes/World")
 
 
 return GameEngine

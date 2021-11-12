@@ -2,6 +2,16 @@ local SuperClass = require("Classes/CoreClass")
 local TransformationMetaTable = {}
 local UDim2Type = require("DataTypes/UDim2")
 local Vector2 = require("DataTypes/Vector2")
+local WorldType = require("DataTypes/World")
+
+------------------------------[[NOTES]]------------------------------
+--
+-- UpdateOffset() When Offset(x,y) is called, it only needs to offset it's children rather than a full update
+--
+--
+--
+--
+------------------------------[[NOTES]]------------------------------
 
 
 
@@ -23,20 +33,26 @@ end
 local function SetPosition(self, PositionUDim2)
   assert(type(PositionUDim2) == "table" and PositionUDim2.__Type == "UDim2", "Invalid DataType, requires type 'UDim2'")
   self.__InternalObj.Position = PositionUDim2
-  if (self.Parent) then
-    self.Parent:UpdatePosition()
+  if (self.Parent and self.Parent.ActualPosition) then
+    local AS = self.Parent.__InternalObj.ActualSize
+    self.__InternalObj.ActualPosition = self.Parent.ActualPosition + Vector2:New(
+      AS.x * PositionUDim2.x.Scale + PositionUDim2.x.Offset, -- x
+      AS.y * PositionUDim2.y.Scale + PositionUDim2.y.Offset  -- y
+    )
+    self:UpdatePosition()
   else
     print("Err; no parent; default ActualPosition")
-    self.__InternalObj.ActualPosition = Vector2:New() -- IDK
+    self.__InternalObj.ActualPosition = Vector2:New(PositionUDim2.x.Offset, PositionUDim2.y.Offset) -- IDK
   end
 end
 
 local function Offset(self, x, y)
-  if (type(PositionUDim2) == "table" and PositionUDim2.__Type == "Vector2") then
+  if (type(x) == "table" and x.__Type == "Vector2") then
     self.__InternalObj.ActualPosition = self.__InternalObj.ActualPosition + x -- in this case x is a Vector2
   else
     self.__InternalObj.ActualPosition = self.__InternalObj.ActualPosition + Vector2:New(x, y)
   end
+  self:UpdatePosition()
 end
 
 local function UpdatePosition(self)
@@ -78,10 +94,8 @@ local function SetPositionMethod(self, a,b,c,d)
     error("Invalid DataType, requires type 'UDim2'")
   end
   
-  if (self.Parent) then
-    self:UpdatePosition()
-    -- Refreshes the position of all children so to be accurate
-  end
+  self:UpdatePosition()
+  
 end
 
 local function GetActualPosition(self)
@@ -118,14 +132,15 @@ function TransformationMetaTable.New(self, DefaultParent, DefaultName)
     ClassName = "Transformation",
     SetPosition  = SetPositionMethod,
     Position = UDim2Type:New(), -- UDim2
-    Size = UDim2Type:New(0,2,0,3),     -- UDim2
+    Size = UDim2Type:New(0,100,0,50),     -- UDim2
     Rotation = 0,   -- Num 0 - 2PI rads
     ActualPosition = Vector2:New(), --Vector2
-    ActualSize = Vector2:New(),     --Vector2
+    ActualSize = Vector2:New(100, 50),     --Vector2
     UpdatePosition = UpdatePosition,
     UpdateSize = UpdateSize,
     GetDistanceTo = GetDistanceTo,
     GetDistanceToObj = GetDistanceToObj,
+    World = WorldType:GetDefaultWorld()
   }
   local WriteExposed = {
     -- Can be freely assigned with no problem

@@ -4,7 +4,7 @@ local Color3Type = require("DataTypes/Color3")
 
 local SpriteMetaTable = {}
 local InteractionLedger = {}
-  setmetatable(InteractionLedger, {__mode = "k"}) -- Creates a weak table
+  setmetatable(InteractionLedger, {__mode = "k"}) -- Creates a weak table -- Do I need this? It gets thrown out next frame
 
 function SpriteMetaTable.__GetInteractionLedger()
   return InteractionLedger
@@ -19,7 +19,7 @@ local function SetColorRGB(self, r, g, b)
   self.__InternalObj.Color = Color3Type:New(r,g,b)
 end
 local function SetColor3(self, NewColor3)
-  assert(type(SizeUDim2) == "table" and SizeUDim2.__Type == "Color3", "Invalid DataType, requires type 'Color3'")
+  assert(type(NewColor3) == "table" and NewColor3.__Type == "Color3", "Invalid DataType, requires type 'Color3' got:" .. tostring(NewColor3))
   self.__InternalObj.Color = NewColor3
 end
 
@@ -65,7 +65,7 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
     --Anything in here can be read but will throw an error if assigned
     ClassName = "Sprite",
     SetColorFromRGB = SetColorRGB,
-    Color = Color3Type:New(),
+    Color = Color3Type:New(1,1,1),
     OnMouseEnter = EventClass:New(),
     OnMouseHover = EventClass:New(),
     OnMouseLeave = EventClass:New(),
@@ -81,6 +81,7 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
     -- Can be freely assigned with no problem
     Transparency = 0,
     Visible = true,
+    ListenToMouse = false,
   }
   SuperObj:__Inject(WriteProtected, WriteExposed, WriteMethods) -- Injects the SuperObj with our updated Values
   --------------------------------------------------------------------------------

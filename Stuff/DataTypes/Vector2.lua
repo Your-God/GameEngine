@@ -63,14 +63,4 @@ end
 
 
 
-local original_type = type  -- saves `type` function
--- monkey patch type function
-type = function( obj )
-    local otype = original_type( obj )
-    if  otype == "table" and getmetatable( obj ) == Vector2_metatable then
-        return "Vector2"
-    end
-    return otype
-end
-
 return Vector2_metatable
