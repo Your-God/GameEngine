@@ -22,9 +22,15 @@ function Vector2_metatable.GetMagnitude(self)
   return math.sqrt(self.x * self.x + self.y * self.y)
 end
 
+function Vector2_metatable.GetUnit(self)
+  return self / self:GetMagnitude()
+end
+
 
 
 --------- vvvv      math      vvvv ---------
+
+
 
 function Vector2_metatable.__add(x, y)
   if not (getmetatable(x) == Vector2_metatable and getmetatable(y) == Vector2_metatable) then
@@ -52,7 +58,11 @@ end
 
 function Vector2_metatable.__div(x, y)
   if (getmetatable(x) == Vector2_metatable and type(y) == "number") then
-    return Vector2_metatable:New(x.x / y, x.y / y)
+    if y == 0 then
+      return Vector2_metatable:New(0,0)
+    else
+      return Vector2_metatable:New(x.x / y, x.y / y)
+    end
   else
     error("failed to divide: '" .. tostring(x) .. "' and '" .. tostring(y) .. "' ... incompatible types")
   end
@@ -60,6 +70,9 @@ end
   
 --------- ^^^^      math      ^^^^ ---------
 
+function Vector2_metatable.__eq(a, b)
+  return (a.x == b.x) and (a.y == b.y)
+end
 
 
 

@@ -4,18 +4,21 @@ local FrameMetaTable = {}
 
 local function Render(self)
   --error("This method hasn't been implemented yet")
-  local Pos = self.ActualPosition
   local Size = self.ActualSize
   local Color = self.__InternalObj.Color
 
   if self.BorderSize ~= 0 then
     local BC = self.__InternalObj.BorderColor
     local BS = self.BorderSize
-    love.graphics.setColor(BC.r, BC.g, BC.b)
-    love.graphics.rectangle("fill",Pos.x - BS, Pos.y - BS, Size.x + BS + BS, Size.y + BS + BS)
+    love.graphics.setColor(BC.r, BC.g, BC.b, self.Opacity)
+    love.graphics.rectangle("fill", 0, 0, Size.x, Size.y)
+
+    love.graphics.setColor(Color.r, Color.g, Color.b, self.Opacity)
+    love.graphics.rectangle("fill", BS, BS, Size.x - BS - BS, Size.y - BS - BS)
+  else
+    love.graphics.setColor(Color.r, Color.g, Color.b, self.Opacity)
+    love.graphics.rectangle("fill", 0, 0, Size.x, Size.y)
   end
-  love.graphics.setColor(Color.r, Color.g, Color.b)
-  love.graphics.rectangle("fill",Pos.x, Pos.y, Size.x, Size.y)
   love.graphics.setColor(1,1,1)
 end
 

@@ -1,3 +1,4 @@
+local TitleScreenScene = {}
 local GE = require("GameEngine")
 local UDim2 = GE:Get("UDim2")
 local Color3 = GE:Get("Color3")
@@ -5,6 +6,7 @@ local Color3 = GE:Get("Color3")
 
 
 local Scene = GE:New("Scene")
+  TitleScreenScene.Scene = Scene
 local MainMenu = GE:New("Frame", Scene)
   MainMenu.Size = UDim2:New(0, 150, 0, 275)
   MainMenu.Position = UDim2:New(0.5,-75,0.5,-100)
@@ -26,6 +28,7 @@ local PlayButton = GE:New("Frame", MainMenu)
   PlayButton.Position = UDim2:New(0.5, -40, 0, 80)
   PlayButton.Color = Color3:FromRGB(181, 168, 87)
   PlayButton.BorderSize = 0
+  PlayButton.Rotation = math.rad(15)
   local PlayTextLabel = GE:New("Text", PlayButton)
     PlayTextLabel.xAlignment = "center"
     PlayTextLabel.yAlignment = "center"
@@ -34,7 +37,7 @@ local PlayButton = GE:New("Frame", MainMenu)
     PlayTextLabel.Text = "Play"
 
 local SettingsButton = GE:New("Frame", MainMenu)
-  SettingsButton.ListenToMouse = true
+  --SettingsButton.ListenToMouse = true
   SettingsButton.Size = UDim2:New(0,80,0,40)
   SettingsButton.Position = UDim2:New(0.5, -40, 0, 125)
   SettingsButton.Color = Color3:FromRGB(181, 168, 87)
@@ -48,7 +51,7 @@ local SettingsButton = GE:New("Frame", MainMenu)
 
 
 local CreditsButton = GE:New("Frame", MainMenu)
-  CreditsButton.ListenToMouse = true
+  --CreditsButton.ListenToMouse = true
   CreditsButton.Size = UDim2:New(0,80,0,40)
   CreditsButton.Position = UDim2:New(0.5, -40, 0, 170)
   CreditsButton.Color = Color3:FromRGB(181, 168, 87)
@@ -86,14 +89,26 @@ local QuitButton = GE:New("Frame", MainMenu)
 
 ------------------------------------------------------------------------------
 
+
+
 QuitButton.OnMouseDown:Connect(
   function(mx,my,button)
     if button == 1 then 
       print("Quitting")
-      love.event.quit()
+      --love.event.quit()
+    else
+      print("Close")
     end
   end)
 
+PlayButton.OnMouseDown:Connect(
+  function(mx,my,button)
+    if button == 1 then 
+      print(".")
+      TitleScreenScene.SetSceneTo("Game")
+    end
+  end
+)
 
 
 
@@ -102,5 +117,4 @@ QuitButton.OnMouseDown:Connect(
 
 
 
-
-return {Scene, {PlayButton, SettingsButton, CreditsButton, QuitButton}}
+return TitleScreenScene

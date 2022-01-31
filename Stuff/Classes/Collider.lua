@@ -11,7 +11,6 @@ local function SetWorld(self, NewValue)
 end
 
 
---How to connect windfield to my Object system?
 
 local function InitilizeAs(self, Type, Position, Size)
   assert(self.__InternalObj.ColliderType == nil, "Can only Initilize the collider once")
@@ -25,9 +24,10 @@ local function InitilizeAs(self, Type, Position, Size)
   if Type == "rectangle" then
     self.__InternalObj.ColliderType = Type
     self.__InternalObj.Body = self.__InternalObj.World:newRectangleCollider(Position.x, Position.y, Size.x, Size.y)
-    self.__InternalObj.Body:setFixedRotation(true) -- We add this due to frame rotation not currently supported
-  elseif false then
-
+    --self.__InternalObj.Body:setFixedRotation(true) -- We add this due to frame rotation not currently supported
+  elseif Type == "circle" then
+    self.__InternalObj.ColliderType = Type
+    self.__InternalObj.Body = self.__InternalObj.World:newCircleCollider(Position.x, Position.y, Size.x)
   else
     error("unknown ColliderType")
   end
@@ -38,18 +38,6 @@ local function GetPosition(self)
 end
 
 
-local function UpdateSize(self)
-  local AS = self.__InternalObj.ActualSize
-  for _, Child in pairs(self:GetChildren()) do
-    if (Child.UpdateSize) then
-      Child.__InternalObj.ActualSize = Vector2:New(
-        AS.x * Child.Size.x.Scale + Child.Size.x.Offset, -- x
-        AS.y * Child.Size.y.Scale + Child.Size.y.Offset  -- y
-      )
-      Child:UpdateSize()
-    end
-  end
-end
 
 local function UpdatePosition(self)
   local AP = self.__InternalObj.ActualPosition
@@ -66,10 +54,23 @@ local function UpdatePosition(self)
   end
 end
 
+
+local function Push(self, Parent)
+  love.graphics.push()
+  local Pos = self:GetPosition()
+  love.graphics.translate(Pos.x, Pos.y)
+  love.graphics.rotate(self.__InternalObj.Body:getAngle())
+end
+
+local function Pop()
+  love.graphics.pop()
+end
+
 local function Render(self)
   local Pos = self:GetPosition()
   local Size = self.__InternalObj.ActualSize 
   self.__InternalObj.ActualPosition = Pos
+  self.Rotation = self.__InternalObj.Body:getAngle()
   
   self:UpdatePosition()
   -- It updates the frame's location every time it renders
@@ -78,9 +79,19 @@ local function Render(self)
   if self.DebugCollider then
     local Offset = Size / 2
     love.graphics.setColor(1,0,0,0.3)
-    love.graphics.rectangle("fill",Pos.x, Pos.y, Size.x - Offset.x, Size.y - Offset.y)
+    --love.graphics.rectangle("fill", 0, 0, Size.x - Offset.x, Size.y - Offset.y)
+    love.graphics.rectangle("fill", -Offset.x, -Offset.y, Size.x, Size.y)
     love.graphics.setColor(1,1,1)
   end
+end
+
+
+local function Destroy(self)
+  self.Parent = nil
+  self.__IsObjectAlive = false -- You can now check to see if the object should be destroyed
+  -- Do I even need the above?
+
+  self.Body:destroy()
 end
 
 
@@ -99,11 +110,14 @@ function ColliderMetaTable.New(self, DefaultParent, DefaultName)
     --Anything in here can be read but will throw an error if assigned
     ClassName = "Collider",
     
+    Destroy = Destroy,
     ActualPosition = Vector2:New(0,0),
     ActualSize = Vector2:New(0,0),
     UpdatePosition = UpdatePosition,
     UpdateSize = UpdateSize,
     Render = Render,
+    Push = Push,
+    Pop = Pop,
     InitilizeAs = InitilizeAs,
     GetPosition = GetPosition, -- UDim2
     Rotation = 0,   -- Num 0 - 2PI rads

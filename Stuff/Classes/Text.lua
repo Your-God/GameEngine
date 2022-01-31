@@ -5,14 +5,13 @@ local TextBoxMetaTable = {}
 
 local function Render(self)
   --error("This method hasn't been implemented yet")
-  local Pos = self.ActualPosition
   local Size = self.ActualSize
   local Color = self.__InternalObj.Color
 
   
   love.graphics.setColor(Color.r, Color.g, Color.b)
   if self.__InternalObj.yAlignment == "top" then
-    love.graphics.printf( self.Text, Pos.x, Pos.y, Size.x, self.__InternalObj.xAlignment)
+    love.graphics.printf( self.Text, 0, 0, Size.x, self.__InternalObj.xAlignment)
   else
     local Font = love.graphics.getFont()
     local TextWidth = Font:getWidth(self.Text)
@@ -23,7 +22,7 @@ local function Render(self)
     else -- "bottom"
       yOffset = Size.y - TextHeight
     end
-    love.graphics.printf( self.Text, Pos.x, Pos.y + yOffset, Size.x, self.__InternalObj.xAlignment)
+    love.graphics.printf( self.Text, 0, 0 + yOffset, Size.x, self.__InternalObj.xAlignment)
   end
 
 

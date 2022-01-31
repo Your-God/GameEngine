@@ -26,8 +26,7 @@ end
 
 
 local function Render(self)
-  local Pos = self.ActualPosition
-  love.graphics.draw(self.__InternalObj.SpriteAsset, Pos.x, Pos.y)
+  love.graphics.draw(self.__InternalObj.SpriteAsset, 0, 0)
   -- Currently Doesn't Scale sprites
 end
 local function SetSprite(self, NewSprite)
@@ -79,7 +78,7 @@ function SpriteMetaTable.New(self, DefaultParent, DefaultName)
   }
   local WriteExposed = {
     -- Can be freely assigned with no problem
-    Transparency = 0,
+    Opacity = 1,
     Visible = true,
     ListenToMouse = false,
   }

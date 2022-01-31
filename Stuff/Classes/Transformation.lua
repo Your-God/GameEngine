@@ -6,7 +6,7 @@ local WorldType = require("DataTypes/World")
 
 ------------------------------[[NOTES]]------------------------------
 --
--- UpdateOffset() When Offset(x,y) is called, it only needs to offset it's children rather than a full update
+--
 --
 --
 --
@@ -24,62 +24,11 @@ local function SetSize(self, SizeUDim2)
 
   assert(type(SizeUDim2) == "table" and SizeUDim2.__Type == "UDim2", "Invalid DataType, requires type 'UDim2'")
   self.__InternalObj.Size = SizeUDim2
-  if self.Parent and self.Parent.UpdateSize then
-    self.Parent:UpdateSize()
-    self.Parent:UpdatePosition() -- We have to update Position because it's dependent on size
-  end
 end
 
 local function SetPosition(self, PositionUDim2)
   assert(type(PositionUDim2) == "table" and PositionUDim2.__Type == "UDim2", "Invalid DataType, requires type 'UDim2'")
   self.__InternalObj.Position = PositionUDim2
-  if (self.Parent and self.Parent.ActualPosition) then
-    local AS = self.Parent.__InternalObj.ActualSize
-    self.__InternalObj.ActualPosition = self.Parent.ActualPosition + Vector2:New(
-      AS.x * PositionUDim2.x.Scale + PositionUDim2.x.Offset, -- x
-      AS.y * PositionUDim2.y.Scale + PositionUDim2.y.Offset  -- y
-    )
-    self:UpdatePosition()
-  else
-    print("Err; no parent; default ActualPosition")
-    self.__InternalObj.ActualPosition = Vector2:New(PositionUDim2.x.Offset, PositionUDim2.y.Offset) -- IDK
-  end
-end
-
-local function Offset(self, x, y)
-  if (type(x) == "table" and x.__Type == "Vector2") then
-    self.__InternalObj.ActualPosition = self.__InternalObj.ActualPosition + x -- in this case x is a Vector2
-  else
-    self.__InternalObj.ActualPosition = self.__InternalObj.ActualPosition + Vector2:New(x, y)
-  end
-  self:UpdatePosition()
-end
-
-local function UpdatePosition(self)
-  local AP = self.__InternalObj.ActualPosition
-  local AS = self.__InternalObj.ActualSize
-  for _, Child in pairs(self:GetChildren()) do
-    if (Child.UpdatePosition) then
-      Child.__InternalObj.ActualPosition = AP + Vector2:New(
-        AS.x * Child.Position.x.Scale + Child.Position.x.Offset, -- x
-        AS.y * Child.Position.y.Scale + Child.Position.y.Offset  -- y
-      )
-      Child:UpdatePosition()
-    end
-  end
-end
-
-local function UpdateSize(self)
-  local AS = self.__InternalObj.ActualSize
-  for _, Child in pairs(self:GetChildren()) do
-    if (Child.UpdateSize) then
-      Child.__InternalObj.ActualSize = Vector2:New(
-        AS.x * Child.Size.x.Scale + Child.Size.x.Offset, -- x
-        AS.y * Child.Size.y.Scale + Child.Size.y.Offset  -- y
-      )
-      Child:UpdateSize()
-    end
-  end
 end
 
 
@@ -92,10 +41,7 @@ local function SetPositionMethod(self, a,b,c,d)
     self.__InternalObj.Position = UDim2Type:New(a,b,c,d)
   else
     error("Invalid DataType, requires type 'UDim2'")
-  end
-  
-  self:UpdatePosition()
-  
+  end 
 end
 
 local function GetActualPosition(self)
@@ -116,6 +62,54 @@ end
 
 
 
+local __Offset = Vector2:New()
+local function Push(self, Parent)
+  local SPos = self.Position
+  local SSize = self.Size
+  love.graphics.push()
+  __Offset.x = SPos.x.Offset + SPos.x.Scale * Parent.ActualSize.x
+  __Offset.y = SPos.y.Offset + SPos.y.Scale * Parent.ActualSize.y
+  
+  self.__InternalObj.ActualSize.x = SSize.x.Offset + SSize.x.Scale * Parent.ActualSize.x
+  self.__InternalObj.ActualSize.y = SSize.y.Offset + SSize.y.Scale * Parent.ActualSize.y
+
+  
+  self.__InternalObj.ActualPosition = self.Parent.ActualPosition + __Offset
+
+
+  -- Rotates around the center point
+
+  if self.Rotation ~= 0 then
+    __Offset = __Offset + self.__InternalObj.ActualSize / 2 --Offset by half the size so that it rotates around the center
+    love.graphics.translate(
+      __Offset.x,
+      __Offset.y
+    )
+    love.graphics.rotate(self.Rotation) 
+    __Offset = self.__InternalObj.ActualSize / -2 -- go back by half the size
+  end
+  love.graphics.translate(
+    __Offset.x,
+    __Offset.y
+  )
+end
+
+local function Pop(self)
+  love.graphics.pop()
+end
+
+
+
+
+
+local function GetRelativeMousePos(self)
+  local mPos = Vector2:New(love.mouse.getPosition())
+  print(ActualPosition)
+  return mPos 
+end
+
+
+
 function TransformationMetaTable.New(self, DefaultParent, DefaultName)
   local SuperObj = SuperClass:New(DefaultParent, DefaultName)
   -- SuperObj is the Class which this class Inherits; Like SuperClass but is an Object
@@ -125,6 +119,7 @@ function TransformationMetaTable.New(self, DefaultParent, DefaultName)
     Rotation = SetRotation,
     Size = SetSize,
     Position = SetPosition,
+    Rotation = SetRotation,
   }
   local WriteProtected = {
     --Anything in here can be read but will throw an error if assigned
@@ -135,12 +130,15 @@ function TransformationMetaTable.New(self, DefaultParent, DefaultName)
     Size = UDim2Type:New(0,100,0,50),     -- UDim2
     Rotation = 0,   -- Num 0 - 2PI rads
     ActualPosition = Vector2:New(), --Vector2
+    Offset = Vector2:New(), --Vector2
     ActualSize = Vector2:New(100, 50),     --Vector2
-    UpdatePosition = UpdatePosition,
-    UpdateSize = UpdateSize,
+    ActualRotation = 0,
+    Push = Push,
+    Pop = Pop,
     GetDistanceTo = GetDistanceTo,
     GetDistanceToObj = GetDistanceToObj,
-    World = WorldType:GetDefaultWorld()
+    World = WorldType:GetDefaultWorld(),
+    GetRelativeMousePos = GetRelativeMousePos,
   }
   local WriteExposed = {
     -- Can be freely assigned with no problem
